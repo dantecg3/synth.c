@@ -9,9 +9,8 @@
 
 #include "bitmap.c"
 
-#define INPUT_BITMAP_SIZE 32
-typedef struct input_context_t 
-{
+#define INPUT_BITCOUNT 256
+typedef struct {
     struct termios old_termios, new_termios;
     bitmap_t key_state;
 } input_context_t;
@@ -28,7 +27,7 @@ void input_init(input_context_t *ctx)
     fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL, 0) | O_NONBLOCK);
     fflush(stdout);
 
-    bitmap_init(&ctx->key_state, INPUT_BITMAP_SIZE);
+    bitmap_init(&ctx->key_state, INPUT_BITCOUNT);
 }
 
 void input_terminate(input_context_t *ctx) 
@@ -41,12 +40,19 @@ void input_update(input_context_t *ctx)
     bitmap_t *keystate = &ctx->key_state;
     bitmap_unset_all(keystate);
 
-    char c;
-    while (read(STDIN_FILENO, &c, 1) > 0)
-        bitmap_set_bit(keystate, (size_t)c);
+    char keys[32];
+
+    ssize_t K = read(STDIN_FILENO, keys, sizeof(keys));
+    if (K <= 0) return;
+
+    for (ssize_t i = 0; i < K; ++i)
+    {
+        unsigned char c = (unsigned char)keys[i];
+        bitmap_set_bit(keystate, c);
+    }
 }
 
-static inline bool input_is_key_pressed(const input_context_t *ctx, size_t key) 
+bool input_is_key_pressed(const input_context_t *ctx, size_t key) 
 {
     return bitmap_get_bit(&ctx->key_state, key);
 }

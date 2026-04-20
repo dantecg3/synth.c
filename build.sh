@@ -33,5 +33,5 @@ fi
 
 INCLUDES="-Isrc"
 
-echo "$CC $SRC $INCLUDES -o $OUT $STD $OPT -Wall -Wextra"
-exec $CC "$SRC" $INCLUDES -o "$OUT" $STD $OPT -Wall -Wextra
+echo "$CC $SRC $INCLUDES -o $OUT $STD $OPT -Wall -Wextra -lm"
+exec $CC "$SRC" $INCLUDES -o "$OUT" $STD $OPT -Wall -Wextra -lm
