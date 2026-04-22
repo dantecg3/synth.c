@@ -31,7 +31,7 @@ if [[ -z "$SRC" ]]; then
     exit 1
 fi
 
-INCLUDES="-Isrc"
+INCLUDES="-Isrc "
 
 echo "$CC $SRC $INCLUDES -o $OUT $STD $OPT -Wall -Wextra -lm"
 exec $CC "$SRC" $INCLUDES -o "$OUT" $STD $OPT -Wall -Wextra -lm

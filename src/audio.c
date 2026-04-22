@@ -6,23 +6,20 @@
 
 #include "signal.c"
 
-typedef struct audio_context_t
-{
+typedef struct {
     ma_device device;
     signal_t *root;
-
 } audio_context_t;
 
-void data_callback(ma_device* device, void* output, const void* input, ma_uint32 frameCount)
+void data_callback(ma_device *device, void *output, const void *input, ma_uint32 frameCount)
 {
     (void)input;
-    audio_context_t* audio = (audio_context_t*)device->pUserData;
-    signal_t* root = audio->root;
+    audio_context_t *audio = (audio_context_t*)device->pUserData;
+    signal_t *root = audio->root;
 
     float* out = (float*)output;
 
-    for (ma_uint32 i = 0; i < frameCount; i++)
-    {
+    for (ma_uint32 i = 0; i < frameCount; i++) {
         if(!root)
         {
             out[i * 2 + 0] = 0; // left

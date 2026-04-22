@@ -15,6 +15,7 @@ struct signal_t {
     signal_func func;
     void* data;
 };
+#define SIGNAL_NULL (signal_t){ NULL, NULL }
 
 typedef struct {
     float phase;
@@ -27,13 +28,19 @@ typedef struct {
     signal_sine_data_t *data;
 } signal_sine_handle_t;
 
+typedef enum { 
+    ADD 
+} signal_op_type_t;
+
 typedef struct {
     signal_t a;
     signal_t b;
-} signal_add_data_t;
+    signal_op_type_t op;
+} signal_op_data_t;
 
 float signal_sine_eval(signal_t *self)
 {
+    if(!self) return 0.0f;
     signal_sine_data_t* d = (signal_sine_data_t*)self->data;
     
     float out = d->amp * sinf(d->phase);
@@ -45,8 +52,9 @@ float signal_sine_eval(signal_t *self)
     return out;
 }
 
-signal_sine_handle_t signal_sine(arena_t *arena, float freq, float amp)
+signal_sine_handle_t signal_sine_ctr(arena_t *arena, float freq, float amp)
 {
+    if(!arena) return (signal_sine_handle_t){ SIGNAL_NULL, NULL };
     signal_sine_data_t* d = arena_alloc(arena, sizeof(signal_sine_data_t));
 
     d->phase = 0;
@@ -62,25 +70,30 @@ signal_sine_handle_t signal_sine(arena_t *arena, float freq, float amp)
     };
 }
 
-float signal_add_eval(signal_t *self)
+float signal_op_eval(signal_t *self)
 {
-    signal_add_data_t* d = (signal_add_data_t*)self->data;
+    if(!self) return 0.0f;
+    signal_op_data_t* d = (signal_op_data_t*)self->data;
     
     float a = d->a.func(&d->a);
     float b = d->b.func(&d->b);
 
-    return a + b;
+    switch (d->op) {
+        case ADD: return a + b;
+    }
+    return 0.0f;
 }
 
-signal_t signal_add(arena_t *arena, signal_t a, signal_t b)
+signal_t signal_op_ctr(arena_t *arena, signal_t a, signal_t b)
 {
-    signal_add_data_t* add = arena_alloc(arena, sizeof(signal_add_data_t));
+    if(!arena) return SIGNAL_NULL;
+    signal_op_data_t* add = arena_alloc(arena, sizeof(signal_op_data_t));
 
     add->a = a;
     add->b = b;
 
     return (signal_t) {
-        .func = signal_add_eval,
+        .func = signal_op_eval,
         .data = add
     };
 }

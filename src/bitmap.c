@@ -43,8 +43,7 @@ void bitmap_set_all(bitmap_t* b)
         b->data[i] = 0xFF;
 
     size_t extra = bytes * 8 - b->bitcount;
-    if (extra)
-    {
+    if (extra) {
         uint8_t mask = (uint8_t)(0xFF >> extra);
         b->data[bytes - 1] &= mask;
     }
@@ -71,8 +70,7 @@ void bitmap_copy(bitmap_t* dst, const bitmap_t* src)
         dst->data[i] = 0x00;
 
     size_t extra = dst_bytes * 8 - dst->bitcount;
-    if (extra)
-    {
+    if (extra) {
         uint8_t mask = (uint8_t)(0xFF >> extra);
         dst->data[dst_bytes - 1] &= mask;
     }

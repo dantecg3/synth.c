@@ -6,9 +6,11 @@
 
 #include "bitmap.c"
 #include "arena.c"
+#include "string.c"
 #include "input.c"
 #include "signal.c"
 #include "audio.c"
+#include "render.c"
 
 double now_seconds()
 {
@@ -22,45 +24,35 @@ int main()
     bool running = true;
     input_context_t input = {0};
     audio_context_t audio = {0};
+    render_screen_t screen = {0};
     arena_t arena = {};
 
-    signal_sine_handle_t osc1 = signal_sine(&arena, 261.63f, 0.3f);
+    signal_sine_handle_t osc1 = signal_sine_ctr(&arena, 261.63f, 0.2f);
+    string_t signal_str = string_ctr("Sine: ");
     
     input_init(&input);
     audio_init(&audio, &osc1.sig);
     
-    while (running)
-    {
+    render_clear(&screen, ' ');
+    while (running) {
         input_update(&input);
+        input_mouse_event_t e = input_handle_mouse_event(&input);
         
-        if (input_is_key_pressed(&input, 'q'))
-            osc1.data->freq = 261.63f; // C4
+        render_clear_terminal();
+        
+        if(e.type == MOUSE_PRESS)
+            render_cell(&screen, e.x, e.y, 'X');
 
-        if (input_is_key_pressed(&input, 'w'))
-            osc1.data->freq = 293.66f; // D4
-
-        if (input_is_key_pressed(&input, 'e'))
-            osc1.data->freq = 329.63f; // E4
-
-        if (input_is_key_pressed(&input, 'r'))
-            osc1.data->freq = 349.23f; // F4
-
-        if (input_is_key_pressed(&input, 't'))
-            osc1.data->freq = 392.00f; // G4
-
-        if (input_is_key_pressed(&input, 'y'))
-            osc1.data->freq = 440.00f; // A4
-
-        if (input_is_key_pressed(&input, 'u'))
-            osc1.data->freq = 493.88f; // B4
-
-        if (input_is_key_pressed(&input, 'i'))
-            osc1.data->freq = 261.63f * 2.0f; // C5
+        string_format(&signal_str, "Sine: freq:%.2f amp:%.2f", osc1.data->freq, osc1.data->amp);
+        render_string(&screen, 0, RENDER_SCREEN_HEIGHT-1, string_view(signal_str.data));
+        
+        render_present(&screen);
 
         if (input_is_key_pressed(&input, 'l'))
             break;
-        
-        usleep(100);
+
+        fflush(stdout);
+        usleep(16000);
     }
 
     input_terminate(&input);

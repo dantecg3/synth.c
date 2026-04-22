@@ -11,15 +11,15 @@ typedef struct {
     size_t offset;
 } arena_t;
 
-void* arena_alloc(arena_t* a, size_t size)
+void* arena_alloc(arena_t *arena, size_t size)
 {
     size = (size + 7) & ~7;
 
-    if (a->offset + size > ARENA_SIZE)
+    if (arena->offset + size > ARENA_SIZE)
         return NULL;
 
-    void* ptr = a->buffer + a->offset;
-    a->offset += size;
+    void* ptr = arena->buffer + arena->offset;
+    arena->offset += size;
 
     return ptr;
 }
